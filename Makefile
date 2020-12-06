@@ -1,7 +1,7 @@
 repo=lwabish
 
 prepare_typecho:
-	exit
+	git clone https://github.com/lwabish/typecho.git
 
 image:
 	docker build -t typecho .
