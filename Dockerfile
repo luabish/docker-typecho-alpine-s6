@@ -14,21 +14,21 @@ LABEL maintainer='HuangYeWuDeng <***@ttys0.in>' \
         org.label-schema.license="MIT"
 
 # Environment variables
-ENV PUID='1000' \
-        PGID='1000' \
+ENV PUID='1001' \
+        PGID='1001' \
         HTTPD_USER='www' \
         PHP_TZ=Asia/Shanghai \
         PHP_MAX_EXECUTION_TIME=600 \
         PHP_FPM_MAX_CHILDREN=128 \
         APP_DEBUG=false
-    
+
 # Install packages
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
         && apk --update add --no-cache \
         tzdata \
         nginx \
         curl \
-#       ncdu \
+        #       ncdu \
         freetype \
         libpng \
         libjpeg-turbo \
@@ -53,8 +53,8 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
         php7-gd \
         php7-zip \
         php7-zlib \
-    && rm -rf /var/cache/apk/* \
-    && rm -rf /usr/share/gtk-doc
+        && rm -rf /var/cache/apk/* \
+        && rm -rf /usr/share/gtk-doc
 
 
 # Configuring timezones, see https://wiki.alpinelinux.org/wiki/Setting_the_timezone
@@ -71,28 +71,27 @@ RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
 #    && adduser -u "$PUID" -D -S -G "$USER" -h /app -g "$USER" "$USER"
 
 # create www user for php-fpm
-RUN addgroup -g 1000 -S $HTTPD_USER \
-    && adduser -u 1000 -D -S -G $HTTPD_USER -h /app -g $HTTPD_USER $HTTPD_USER \
-    && chown -R nginx:nginx /var/lib/nginx
+RUN addgroup -g ${PGID} -S $HTTPD_USER \
+        && adduser -u ${PUID} -D -S -G $HTTPD_USER -h /app -g $HTTPD_USER $HTTPD_USER \
+        && chown -R nginx:nginx /var/lib/nginx
 
 # copy app build result to image
-COPY --chown=1000:1000 typecho /app/
+COPY --chown=${PUID}}:${PGID} typecho /app/
 
 # for debug COPY instruction
 # RUN ls -lhp /app/
 
 # Configure Nginx and PHP-FPM
-COPY docker/config/ /etc/
+COPY config/ /etc/
 
 # Configure s6 service
-COPY docker/services.d /etc/services.d/
+COPY services.d /etc/services.d/
 RUN chmod +x /etc/services.d/*/run
 
 # inject before run
 # ref to https://github.com/dockage/runit-scripts/tree/master/alpine/etc/sv
-COPY docker/app-init.sh docker/inject.sh /
-RUN chmod +x /app-init.sh \
-        && chmod +x /inject.sh
+COPY app-init.sh /
+RUN chmod +x /app-init.sh
 
 # Setting the workdir
 WORKDIR /app
@@ -101,7 +100,7 @@ EXPOSE 80
 VOLUME /data
 
 HEALTHCHECK --interval=6s --timeout=3s \
-  CMD curl -INfs http://localhost/ > /dev/null || exit 1
+        CMD curl -INfs http://localhost/ > /dev/null || exit 1
 
 CMD ["/app-init.sh"]
 
