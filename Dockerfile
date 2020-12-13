@@ -56,13 +56,7 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
         && rm -rf /var/cache/apk/* \
         && rm -rf /usr/share/gtk-doc
 
-
-# Configuring timezones, see https://wiki.alpinelinux.org/wiki/Setting_the_timezone
-RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-        && echo "Asia/Shanghai" >  /etc/timezone \
-        && apk del --no-cache tzdata \
-        && rm -rf /var/cache/apk/*
-
+RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 # Create application folder
 # RUN mkdir -p /app
 
