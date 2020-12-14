@@ -70,7 +70,7 @@ RUN addgroup -g ${PGID} -S $HTTPD_USER \
         && chown -R nginx:nginx /var/lib/nginx
 
 # copy app build result to image
-COPY --chown=${PUID}}:${PGID} typecho /app/
+COPY --chown=${PUID}:${PGID} typecho /app/
 
 # for debug COPY instruction
 # RUN ls -lhp /app/
